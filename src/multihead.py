@@ -15,18 +15,18 @@ class MultiHeadSelfAttn(nn.Module):
         self.out_features = out_features
         
         # Make sure that in_features is compatible with the number of heads
-        assert in_features % heads == 0
+        assert self.out_features % heads == 0
         
         # dk is the size of each of the linear projections of the embedding
-        self.dk = in_features // 8
+        self.dk = self.out_features // 8
         
         # These are the parameters to project the matrix to the amount of heads
-        self.key_projections = nn.Linear(self.in_features, self.in_features)
-        self.value_projections = nn.Linear(self.in_features, self.in_features)
-        self.query_projections = nn.Linear(self.in_features, self.in_features)
+        self.key_projections = nn.Linear(self.in_features, self.out_features)
+        self.value_projections = nn.Linear(self.in_features, self.out_features)
+        self.query_projections = nn.Linear(self.in_features, self.out_features)
         
         # The final linear layer
-        self.end_linear = nn.Linear(self.in_features, self.out_features)
+        self.end_linear = nn.Linear(self.out_features, self.out_features)
         
         # Softmax
         self.softmax = nn.Softmax(dim=1)
@@ -66,8 +66,14 @@ class MultiHeadSelfAttn(nn.Module):
         attn_out = self.scaled_attention(query, keys, values)
         
         # Put it in dimensions (batches, sequence_length, in_features)
-        attn_out = attn_out.view(batches, sequence_length, self.in_features)
+        attn_out = attn_out.view(batches, sequence_length, self.out_features)
         
         # Apply the final linear layer
         return self.end_linear(attn_out)
-        
+
+
+if __name__ == "__main__":
+    x = torch.randn(16, 40, 768)
+    multi = MultiHeadSelfAttn(768, 512)
+    print("Input size: {}".format(x.size()))
+    print("Output size: {}".format(multi(x).size()))
