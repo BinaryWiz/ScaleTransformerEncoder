@@ -3,7 +3,7 @@ import torch.nn as nn
 import math
 
 class MultiHeadSelfAttn(nn.Module):
-    def __init__(self, in_features, out_features, heads=8):
+    def __init__(self, in_features, out_features, heads=8, head_scale=False):
         '''
         in_features: should be equal to the embedding_dimension
         output: what the size of the output embedding should be
@@ -13,20 +13,24 @@ class MultiHeadSelfAttn(nn.Module):
         self.in_features = in_features
         self.heads = heads
         self.out_features = out_features
+        self.head_features = in_features
+        
+        if head_scale:
+            self.head_features = self.out_features
         
         # Make sure that in_features is compatible with the number of heads
-        assert self.out_features % heads == 0
+        assert self.head_features % heads == 0
         
         # dk is the size of each of the linear projections of the embedding
-        self.dk = self.out_features // 8
+        self.dk = self.head_features // 8
         
         # These are the parameters to project the matrix to the amount of heads
-        self.key_projections = nn.Linear(self.in_features, self.out_features)
-        self.value_projections = nn.Linear(self.in_features, self.out_features)
-        self.query_projections = nn.Linear(self.in_features, self.out_features)
+        self.key_projections = nn.Linear(self.in_features, self.head_features)
+        self.value_projections = nn.Linear(self.in_features, self.head_features)
+        self.query_projections = nn.Linear(self.in_features, self.head_features)
         
         # The final linear layer
-        self.end_linear = nn.Linear(self.out_features, self.out_features)
+        self.end_linear = nn.Linear(self.head_features, self.out_features)
         
         # Softmax
         self.softmax = nn.Softmax(dim=1)
@@ -66,7 +70,7 @@ class MultiHeadSelfAttn(nn.Module):
         attn_out = self.scaled_attention(query, keys, values)
         
         # Put it in dimensions (batches, sequence_length, in_features)
-        attn_out = attn_out.view(batches, sequence_length, self.out_features)
+        attn_out = attn_out.view(batches, sequence_length, self.head_features)
         
         # Apply the final linear layer
         return self.end_linear(attn_out)

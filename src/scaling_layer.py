@@ -26,8 +26,8 @@ class ScalingLayer(nn.Module):
                                         out_features=self.out_features)
         
         # The Layer Normalization layers
-        self.multihead_ln = nn.LayerNorm(out_features)
-        self.pwff_ln = nn.LayerNorm(out_features)
+        self.multihead_ln = nn.LayerNorm(self.out_features)
+        self.pwff_ln = nn.LayerNorm(self.out_features)
     
     def forward(self, embeddings):
         # This will be for adding later
