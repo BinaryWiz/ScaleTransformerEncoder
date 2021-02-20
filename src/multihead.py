@@ -43,8 +43,8 @@ class MultiHeadSelfAttn(nn.Module):
         attn = self.softmax(attn)
         
         # Multiply the softmax output by the values
-        attn = torch.matmul(attn, head_values)
-        return attn
+        attn_head = torch.matmul(attn, head_values)
+        return attn_head, attn
         
     def forward(self, embeddings):
         '''
@@ -67,13 +67,13 @@ class MultiHeadSelfAttn(nn.Module):
         values = values.view(batches, self.heads, sequence_length, self.dk)
         
         # Calculated the scaled dot-product attention
-        attn_out = self.scaled_attention(query, keys, values)
+        attn_head, attn = self.scaled_attention(query, keys, values)
         
         # Put it in dimensions (batches, sequence_length, in_features)
-        attn_out = attn_out.view(batches, sequence_length, self.head_features)
+        attn_head = attn_head.view(batches, sequence_length, self.head_features)
         
         # Apply the final linear layer
-        return self.end_linear(attn_out)
+        return self.end_linear(attn_head), attn
 
 
 if __name__ == "__main__":
