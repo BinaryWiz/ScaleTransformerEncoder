@@ -65,7 +65,6 @@ class ScalingLayer(nn.Module):
         
         # Forward propagate through the multihead attention layer
         out, attn = self.multihead(embeddings)
-        print("Multihead output size: ", out.size())
         
         # Scale the original embeddings down to add element-wise (if in_features != out_features)
         if self.multihead_scale and (self.in_features != self.out_features):
