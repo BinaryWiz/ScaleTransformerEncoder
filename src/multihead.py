@@ -33,7 +33,7 @@ class MultiHeadSelfAttn(nn.Module):
         self.end_linear = nn.Linear(self.head_features, self.out_features)
         
         # Softmax
-        self.softmax = nn.Softmax(dim=1)
+        self.softmax = nn.Softmax(dim=2)
         
     def scaled_attention(self, head_query, head_keys, head_values):
         # Calculate the scaled dot-product
@@ -77,7 +77,9 @@ class MultiHeadSelfAttn(nn.Module):
 
 
 if __name__ == "__main__":
-    x = torch.randn(16, 40, 768)
-    multi = MultiHeadSelfAttn(768, 512)
+    x = torch.randn(1, 5, 16)
+    multi = MultiHeadSelfAttn(16, 16)
+    out, attn = multi(x)
     print("Input size: {}".format(x.size()))
-    print("Output size: {}".format(multi(x).size()))
+    print("Output size: {}".format(out.size()))
+    print("Attention size: {}".format(attn.size()))
