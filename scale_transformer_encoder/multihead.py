@@ -5,8 +5,12 @@ import math
 class MultiHeadSelfAttn(nn.Module):
     def __init__(self, in_features, out_features, heads=8, head_scale=False):
         '''
+        Multi-Head Self Attention as implemented in the Transformer paper.
         in_features: should be equal to the embedding_dimension
-        output: what the size of the output embedding should be
+        out_features: what the size of the output embedding should be
+        heads: Number of heads for the attention (default is 8)
+        head_scale: If true, the dimensions of each head will be (in_features / heads) -> (out_features / heads).
+                    By default, if the dimensions are not the same, the scaling happens in the last linear layer (head_scale=False).
         '''
         
         super(MultiHeadSelfAttn, self).__init__()
@@ -19,10 +23,10 @@ class MultiHeadSelfAttn(nn.Module):
             self.head_features = self.out_features
         
         # Make sure that in_features is compatible with the number of heads
-        assert self.head_features % heads == 0
+        assert self.head_features % self.heads == 0
         
         # dk is the size of each of the linear projections of the embedding
-        self.dk = self.head_features // 8
+        self.dk = self.head_features // self.heads
         
         # These are the parameters to project the matrix to the amount of heads
         self.key_projections = nn.Linear(self.in_features, self.head_features)

@@ -1,31 +1,48 @@
 import torch
 import torch.nn as nn
-from multihead import MultiHeadSelfAttn
-from position_wise_feed_forward import PositionWiseFeedForward
+from scale_transformer_encoder.multihead import MultiHeadSelfAttn
+from scale_transformer_encoder.position_wise_feed_forward import PositionWiseFeedForward
 
 class ScalingLayer(nn.Module):
     def __init__(self,
                  in_features,
                  out_features,
                  pwff_inner_features,
+                 heads=8,
                  multihead_scale=False,
                  head_scale=False,
                  return_attn=False, 
                  pwff_dropout=0.1):
-
+        '''
+        A transformer that can have a different input and output dimension.
+        in_features: The size of the input dimension
+        out_features: The size of the output dimension
+        pwff_inner_features: The size of the position-wise feed forward network (usually larger than output dimension)
+        heads: Number of heads in the multi-head self attention.
+        multihead_scale: Set to true if the scaling from the input dimension to the output dimension should happen 
+                         in the multi-head module. By default, it happens in the position-wise feed forward network.
+        head_scale: Only applies if multihead_scale is set to true. By default, the scaling in the multi-head will happen
+                    in the last linear layer. Set to true if it should happen in each head of the module.
+                    Check multihead.py for more information.
+        return_attn: Default is false. Set to true if the transformer should also output the attention matrix.
+        pwff_dropout: Set the dropout for the position-wise feed forward network.
+        '''
+        
         super(ScalingLayer, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
         self.pwff_inner_features = pwff_inner_features
-        self.pwff_dropout = pwff_dropout
+        self.heads = heads
         self.multihead_scale = multihead_scale
         self.head_scale = head_scale,
         self.return_attn = return_attn
+        self.pwff_dropout = pwff_dropout
         
         if self.multihead_scale:
             # Multi-Head Self Attention (scaling)
             self.multihead = MultiHeadSelfAttn(in_features=self.in_features,
                                             out_features=self.out_features,
+                                            heads=self.heads,
                                             head_scale=self.head_scale)
             
             # Position-Wise Feed Forward (no scaling)
@@ -38,6 +55,7 @@ class ScalingLayer(nn.Module):
             # Multi-Head Self Attention (no scaling)
             self.multihead = MultiHeadSelfAttn(in_features=self.in_features,
                                             out_features=self.in_features,
+                                            heads=self.heads,
                                             head_scale=False)
 
             # Position-Wise Feed Forward (scaling)
