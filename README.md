@@ -22,7 +22,7 @@ print("Attention size: {}".format(attn.size()))
 
 ## Output
 ```python
-Input size: torch.Size([16, 40, 768])
-Output size: torch.Size([16, 40, 768])
+Input size: torch.Size([16, 40, 256])
+Output size: torch.Size([16, 40, 512])
 Attention size: torch.Size([16, 8, 40, 40])
 ```
