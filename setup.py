@@ -13,5 +13,5 @@ setup(
    author_email='jason.acheampong24@gmail.com',
    url="https://github.com/Mascerade/ScaleTransformerEncoder",
    packages=['scale_transformer_encoder'],
-   install_requires=['pytorch']
+   install_requires=['torch']
 )
