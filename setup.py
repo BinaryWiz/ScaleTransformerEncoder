@@ -4,7 +4,7 @@ with open("README.md", 'r') as f:
     long_description = f.read()
 
 setup(
-   name='Scale Transformer Encoder',
+   name='scale-transformer-encoder',
    version='0.1',
    description='A Transformer encoder where the embedding size (dmodel) can be changed.',
    license="MIT",
